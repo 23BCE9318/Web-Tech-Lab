@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ASUS ZenBook | Premium Showcase</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    
+    <style>
+        /* High-End Background to match the Laptop aesthetic */
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: radial-gradient(circle at center, #ffffff 0%, #e2e8f0 100%);
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* The Product Card Container */
+        .product-card {
+            width: 350px;
+            background: #ffffff;
+            border-radius: 24px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(0, 0, 0, 0.03);
+            overflow: hidden;
+            transition: all 0.5s cubic-bezier(0.165, 0.84, 0.44, 1);
+            position: relative;
+        }
+
+        /* Lift and Glow effect on Hover */
+        .product-card:hover {
+            transform: translateY(-15px);
+            box-shadow: 0 40px 80px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Image Box - Optimized for the ASUS link */
+        .image-box {
+            position: relative;
+            width: 100%;
+            height: 260px;
+            background-color: #f8fafc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .image-box img {
+            max-width: 90%;
+            height: auto;
+            object-fit: contain;
+            transition: transform 0.6s ease;
+        }
+
+        .product-card:hover .image-box img {
+            transform: scale(1.08) rotate(-2deg); /* Added a slight tilt for style */
+        }
+
+        /* Floating Status Badge */
+        .badge {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: #0f172a;
+            color: #ffffff;
+            padding: 6px 14px;
+            font-size: 11px;
+            font-weight: 600;
+            border-radius: 30px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            z-index: 2;
+        }
+
+        /* Details Section */
+        .details {
+            padding: 30px;
+            background: #ffffff;
+        }
+
+        .product-title {
+            margin: 0;
+            font-size: 22px;
+            color: #1e293b;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .product-desc {
+            font-size: 14px;
+            color: #64748b;
+            line-height: 1.6;
+            margin: 12px 0 20px 0;
+            min-height: 65px; /* Keeps card height consistent */
+        }
+
+        /* Pricing Area */
+        .price-section {
+            display: flex;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .current-price {
+            font-size: 28px;
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        .old-price {
+            font-size: 16px;
+            color: #94a3b8;
+            text-decoration: line-through;
+            margin-left: 10px;
+        }
+
+        /* Buy Now Button with Gradient */
+        .buy-now-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            color: #ffffff;
+            border: none;
+            border-radius: 14px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 15px rgba(15, 23, 42, 0.2);
+        }
+
+        .buy-now-btn:hover {
+            box-shadow: 0 15px 25px rgba(15, 23, 42, 0.35);
+            filter: brightness(1.2);
+            transform: translateY(-2px);
+        }
+
+        .buy-now-btn:active {
+            transform: translateY(1px);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="product-card">
+        <div class="image-box">
+            <span class="badge">Limited Stock</span>
+            <img src="https://rukminim2.flixcart.com/image/480/640/xif0q/computer/y/l/p/-original-imagp7pfjzskhwan.jpeg?q=90" alt="ASUS Zenbook 14 OLED">
+        </div>
+
+        <div class="details">
+            <h2 class="product-title">ASUS ZenBook 14 OLED</h2>
+            <p class="product-desc">
+                High-performance ultraportable with 2.8K 90Hz OLED display. Powered by the latest Intel Core processor for seamless multitasking.
+            </p>
+            
+            <div class="price-section">
+                <span class="current-price">$1,299.00</span>
+                <span class="old-price">$1,499.00</span>
+            </div>
+
+            <button class="buy-now-btn">Buy Now</button>
+        </div>
+    </div>
+
+</body>
+</html>

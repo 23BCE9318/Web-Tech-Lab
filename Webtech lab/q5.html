@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meghana | Full Stack Developer</title>
+    <style>
+        /* 1. Restored Original Colors */
+        :root {
+            --bg-dark: #0a0b10;      
+            --bg-sidebar: #161b22;   
+            --bg-content: #000000;   
+            --accent-primary: #a29bfe; /* Soft Violet */
+            --accent-glow: #00d2ff;    /* Cyber Cyan */
+            --text-bright: #ffffff;
+            --text-dim: #b1b1b1;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-dark);
+            color: var(--text-bright);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* Restored AI Orbit Background Glow */
+        body::after {
+            content: '';
+            position: fixed;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(162,155,254,0.06) 0%, transparent 70%);
+            z-index: -1;
+        }
+
+        /* Centered Portfolio Card */
+        .portfolio-card {
+            display: flex;
+            width: 100%;
+            max-width: 1050px;
+            background: var(--bg-content);
+            border: 1px solid rgba(162,155,254,0.15);
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.8);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 40%;
+            background-color: var(--bg-sidebar);
+            padding: 70px 50px;
+        }
+
+        .header-area h1 {
+            font-size: 2.2rem;
+            margin: 0;
+            background: linear-gradient(to right, var(--accent-primary), var(--accent-glow));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 800;
+        }
+
+        .role {
+            font-size: 0.9rem;
+            color: var(--accent-glow);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-top: 5px;
+        }
+
+        .line-divider {
+            width: 60px;
+            height: 4px;
+            background: var(--accent-primary);
+            margin: 20px 0 50px 0;
+            box-shadow: 0 0 10px var(--accent-primary);
+            border-radius: 2px;
+        }
+
+        h2 {
+            text-transform: lowercase;
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            color: var(--text-bright);
+            font-weight: bold;
+        }
+
+        .section { margin-bottom: 50px; }
+
+        .section p {
+            font-size: 0.95rem;
+            color: var(--text-dim);
+            line-height: 1.6;
+        }
+
+        /* Clean Skills List */
+        .skills-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .skills-list li {
+            font-size: 0.95rem;
+            color: var(--text-dim);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+        }
+
+        .skills-list li::before {
+            content: "•";
+            color: var(--accent-primary);
+            margin-right: 12px;
+            font-weight: bold;
+        }
+
+        /* Main Content */
+        .main-content {
+            width: 60%;
+            padding: 90px 60px;
+            background-color: var(--bg-content);
+        }
+
+        .item {
+            margin-bottom: 45px;
+            border-left: 1px solid rgba(162, 155, 254, 0.2);
+            padding-left: 20px;
+        }
+
+        .item h3 {
+            text-transform: lowercase;
+            font-size: 1.15rem;
+            color: var(--accent-glow);
+            margin-bottom: 10px;
+        }
+
+        .item p {
+            font-size: 0.95rem;
+            color: var(--text-dim);
+            line-height: 1.7;
+        }
+
+        .contact-link {
+            color: var(--accent-primary);
+            text-decoration: none;
+            transition: 0.3s;
+        }
+
+        .contact-link:hover {
+            color: var(--accent-glow);
+        }
+
+        @media (max-width: 800px) {
+            .portfolio-card { flex-direction: column; }
+            .sidebar, .main-content { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="portfolio-card">
+        <aside class="sidebar">
+            <div class="header-area">
+                <h1>MEGHANA</h1>
+                <p class="role">Full Stack Developer</p>
+                <div class="line-divider"></div>
+            </div>
+
+            <div class="section">
+                <h2>about me</h2>
+                <p>I am a student at VIT AP focusing on building end-to-end web applications. I bridge the gap between powerful Java-based backends and responsive, user-centric frontends.</p>
+            </div>
+
+            <div class="section">
+                <h2>skills</h2>
+                <ul class="skills-list">
+                    <li>Java (Core & Advanced)</li>
+                    <li>HTML5 & CSS3</li>
+                    <li>JavaScript</li>
+                    <li>SQL & Database Design</li>
+                    <li>Object-Oriented Programming</li>
+                    <li>Responsive Web Design</li>
+                </ul>
+            </div>
+
+            <div class="section">
+                <h2>contacts</h2>
+                <p><a href="mailto:meghana@vitap.ac.in" class="contact-link">meghana@vitap.ac.in</a></p>
+                <p style="margin-top:8px; font-size: 0.9rem; color: var(--text-dim);">Amaravati, India</p>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <h2 style="font-size: 1.8rem; margin-bottom: 50px;">experience</h2>
+
+            <div class="item">
+                <h3>student management system</h3>
+                <p>Developed a full-stack application using Java for backend logic and HTML/CSS for the interface. Implemented CRUD operations to manage student records efficiently.</p>
+            </div>
+
+            <div class="item">
+                <h3>interactive web dashboard</h3>
+                <p>Built a responsive dashboard featuring clean HTML5 structure and custom CSS3 styling. Focused on data readability and fluid layouts across all devices.</p>
+            </div>
+
+            <div class="item">
+                <h3>portfolio development</h3>
+                <p>Created modern, high-tech web interfaces using advanced CSS techniques like Flexbox, Grid, and radial gradients to enhance user engagement.</p>
+            </div>
+        </main>
+    </div>
+
+</body>
+</html>
