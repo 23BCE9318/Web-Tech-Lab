@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>HTML5 Audio and Video</title>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #f4f4f4;
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.container {
+    width: 620px;
+}
+
+.box {
+    background: white;
+    padding: 15px;
+    margin: 10px 0;
+    border-radius: 10px;
+    box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+}
+
+video, audio {
+    width: 100%;
+    height: 120px; /* smaller to fit on screen */
+}
+
+.time {
+    font-weight: bold;
+    margin-top: 10px;
+}
+
+button {
+    padding: 8px 16px;
+    margin: 5px;
+    font-size: 14px;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+    <h1>HTML5 Audio and Video</h1>
+
+    <div class="box">
+        <h2>Video</h2>
+        <video id="video" controls>
+            <source src="https://media.w3.org/2010/05/sintel/trailer.mp4" type="video/mp4">
+        </video>
+        <div class="time" id="videoTime">Time: 0 / 52 sec</div>
+    </div>
+
+    <div class="box">
+        <h2>Audio</h2>
+        <audio id="audio" controls>
+            <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" type="audio/mpeg">
+        </audio>
+        <div class="time" id="audioTime">Time: 0 / 52 sec</div>
+    </div>
+
+    <div>
+        <button onclick="playBoth()">▶ Play</button>
+        <button onclick="pauseBoth()">⏸ Pause</button>
+    </div>
+</div>
+
+<script>
+const video = document.getElementById("video");
+const audio = document.getElementById("audio");
+const videoTime = document.getElementById("videoTime");
+const audioTime = document.getElementById("audioTime");
+
+const LIMIT = 52;
+
+// Play both
+function playBoth() {
+    video.play();
+    audio.play();
+}
+
+// Pause both
+function pauseBoth() {
+    video.pause();
+    audio.pause();
+}
+
+// Update time dynamically
+video.addEventListener("timeupdate", () => {
+    if(video.currentTime >= LIMIT){
+        video.pause();
+        video.currentTime = LIMIT;
+        // Audio can continue if you want
+    }
+    videoTime.innerText = "Time: " + Math.floor(video.currentTime) + " / " + LIMIT + " sec";
+    audioTime.innerText = "Time: " + Math.floor(video.currentTime) + " / " + LIMIT + " sec";
+});
+</script>
+
+</body>
+</html>

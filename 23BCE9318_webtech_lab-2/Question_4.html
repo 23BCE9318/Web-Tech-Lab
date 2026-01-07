@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Management System | Pink Edition</title>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #f06292;
+            --primary-hover: #e91e63;
+            --bg-gradient: linear-gradient(135deg, #fff5f7 0%, #fce4ec 100%);
+            --glass-bg: rgba(255, 255, 255, 0.85);
+            --text-main: #880e4f;
+            --text-sub: #ad1457;
+            --danger: #d81b60;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Quicksand', sans-serif; }
+
+        body {
+            background: var(--bg-gradient);
+            min-height: 100vh;
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            padding: 50px 20px;
+        }
+
+        .dashboard-container {
+            width: 100%;
+            max-width: 900px;
+        }
+
+        .header { text-align: center; margin-bottom: 35px; }
+        .header h1 {
+            font-size: 2.2rem;
+            color: var(--text-main);
+            font-weight: 700;
+        }
+
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 2px solid white;
+            border-radius: 30px;
+            box-shadow: 0 15px 35px rgba(252, 228, 236, 0.8);
+            padding: 30px;
+            margin-bottom: 25px;
+        }
+
+        .registration-form {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .input-group { display: flex; flex-direction: column; gap: 8px; }
+        label { font-size: 0.9rem; font-weight: 700; color: var(--text-sub); }
+
+        input {
+            padding: 12px 18px;
+            border-radius: 15px;
+            border: 2px solid #fce4ec;
+            background: white;
+            font-size: 15px;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        input:focus { border-color: var(--primary); background: #fffcfd; }
+
+        .action-bar { grid-column: span 2; display: flex; gap: 15px; margin-top: 10px; }
+
+        .btn {
+            padding: 14px 25px;
+            border-radius: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.3s;
+            border: none;
+            font-size: 15px;
+        }
+
+        .btn-primary { background: var(--primary); color: white; flex: 2; box-shadow: 0 5px 15px rgba(240, 98, 146, 0.3); }
+        .btn-primary:hover { background: var(--primary-hover); transform: translateY(-2px); }
+
+        .btn-clear { background: #fce4ec; color: var(--primary); flex: 1; }
+        .btn-clear:hover { background: var(--danger); color: white; }
+
+        .table-wrapper { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; }
+
+        th { text-align: left; padding: 15px; color: var(--text-sub); font-size: 0.85rem; border-bottom: 2px solid #fce4ec; }
+        td { padding: 15px; border-bottom: 1px solid #fce4ec; font-size: 1rem; }
+
+        .user-info b { display: block; color: var(--text-main); }
+        .user-info span { font-size: 0.85rem; color: var(--text-sub); }
+
+        .badge-pink { background: #fdf2f7; color: var(--primary); padding: 5px 12px; border-radius: 10px; font-weight: 700; }
+       
+        .btn-delete {
+            color: white;
+            cursor: pointer;
+            font-weight: 700;
+            padding: 6px 12px;
+            border-radius: 10px;
+            background: #f06292;
+            border: none;
+            font-size: 0.85rem;
+        }
+        .btn-delete:hover { background: var(--danger); }
+
+        .empty-msg { text-align: center; padding: 30px; color: var(--text-sub); font-weight: 600; }
+    </style>
+</head>
+<body>
+
+<div class="dashboard-container">
+    <div class="header">
+        <h1>User Management System</h1>
+    </div>
+
+    <div class="glass-card">
+        <form id="regForm" class="registration-form">
+            <div class="input-group">
+                <label>Name</label>
+                <input type="text" id="uName" placeholder="Full Name" required>
+            </div>
+            <div class="input-group">
+                <label>Email</label>
+                <input type="email" id="uEmail" placeholder="email@example.com" required>
+            </div>
+            <div class="input-group">
+                <label>Mobile Number</label>
+                <input type="text" id="uMobile" placeholder="10 Digits" required>
+            </div>
+            <div class="input-group">
+                <label>Password</label>
+                <input type="password" id="uPass" placeholder="Min. 6 Characters" required>
+            </div>
+            <div class="action-bar">
+                <button type="submit" class="btn btn-primary">Register User</button>
+                <button type="button" class="btn btn-clear" onclick="clearData()">Clear All Users</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="glass-card">
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Identity</th>
+                        <th>Contact No.</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="userDisplay"></tbody>
+            </table>
+            <div id="noDataMsg" class="empty-msg">No Users Found</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const regForm = document.getElementById('regForm');
+    const userDisplay = document.getElementById('userDisplay');
+    const noDataMsg = document.getElementById('noDataMsg');
+
+    document.addEventListener('DOMContentLoaded', updateTable);
+
+    regForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+
+        const name = document.getElementById('uName').value;
+        const email = document.getElementById('uEmail').value;
+        const mobile = document.getElementById('uMobile').value;
+        const password = document.getElementById('uPass').value;
+
+        // Validation Rules
+        if (mobile.length !== 10 || isNaN(mobile)) {
+            alert("Mobile number must be 10 digits!");
+            return;
+        }
+        if (password.length < 6) {
+            alert("Password must be at least 6 characters!");
+            return;
+        }
+
+        let db = JSON.parse(localStorage.getItem('user_db')) || [];
+
+        // Unique Email Check
+        if (db.some(user => user.email === email)) {
+            alert("Email already exists in the system!");
+            return;
+        }
+
+        db.push({ name, email, mobile, password });
+        localStorage.setItem('user_db', JSON.stringify(db));
+       
+        regForm.reset();
+        updateTable();
+    });
+
+    function updateTable() {
+        const db = JSON.parse(localStorage.getItem('user_db')) || [];
+        userDisplay.innerHTML = '';
+
+        if (db.length === 0) {
+            noDataMsg.style.display = 'block';
+            return;
+        }
+        noDataMsg.style.display = 'none';
+
+        db.forEach((user, i) => {
+            userDisplay.innerHTML += `
+                <tr>
+                    <td class="user-info">
+                        <b>${user.name}</b>
+                        <span>${user.email}</span>
+                    </td>
+                    <td><span class="badge-pink">${user.mobile}</span></td>
+                    <td><button class="btn-delete" onclick="removeUser(${i})">Delete</button></td>
+                </tr>
+            `;
+        });
+    }
+
+    function removeUser(i) {
+        let db = JSON.parse(localStorage.getItem('user_db'));
+        db.splice(i, 1);
+        localStorage.setItem('user_db', JSON.stringify(db));
+        updateTable();
+    }
+
+    function clearData() {
+        if (confirm("Erase all records from LocalStorage?")) {
+            localStorage.removeItem('user_db');
+            updateTable();
+        }
+    }
+</script>
+
+</body>
+</html>

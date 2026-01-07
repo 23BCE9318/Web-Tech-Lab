@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sky Blue Task Manager</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* CSS DESIGN */
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Outfit', sans-serif; }
+
+        body {
+            background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .main-container {
+            width: 100%;
+            max-width: 1100px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .header-box {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            padding: 20px 30px;
+            border-radius: 20px;
+            margin-bottom: 40px;
+            display: flex;
+            gap: 15px;
+            box-shadow: 0 10px 30px rgba(186, 230, 253, 0.5);
+            border: 1px solid white;
+        }
+
+        input {
+            padding: 12px 20px;
+            width: 300px;
+            border: 2px solid #f0f9ff;
+            border-radius: 12px;
+            outline: none;
+            background: white;
+            font-size: 16px;
+        }
+
+        button {
+            padding: 12px 30px;
+            background: #0ea5e9;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        button:hover { background: #0284c7; transform: translateY(-2px); }
+
+        .board { display: flex; justify-content: center; gap: 25px; width: 100%; flex-wrap: wrap; }
+
+        .column {
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            width: 330px;
+            min-height: 500px;
+            border-radius: 24px;
+            padding: 20px;
+        }
+
+        .column h3 {
+            font-size: 1rem;
+            text-align: center;
+            margin-bottom: 25px;
+            padding: 12px;
+            border-radius: 12px;
+            background: white;
+            color: #0369a1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        /* Task Cards */
+        .task-card {
+            background: white;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 16px;
+            cursor: grab;
+            border: 1px solid #f0f9ff;
+            transition: 0.3s ease;
+        }
+
+        .task-card strong { display: block; margin-bottom: 8px; color: #1e293b; }
+
+        .date-tag { font-size: 0.75rem; color: #0ea5e9; background: #f0f9ff; padding: 4px 10px; border-radius: 8px; }
+
+        /* Status Line Styling */
+        .status-msg {
+            display: none; /* Hidden until dropped in Completed */
+            margin-top: 12px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: #166534;
+            background: #dcfce7;
+            padding: 6px;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid #bdf0d2;
+        }
+
+        /* Completed State Styling */
+        .completed-task {
+            background: #f0fdf4 !important;
+            border-color: #86efac !important;
+        }
+       
+        /* Removed the slash line (text-decoration: line-through) */
+        .completed-task strong {
+            text-decoration: none !important;
+            color: #166534;
+        }
+
+        /* Show message only in completed column */
+        .completed-task .status-msg { display: block; }
+
+    </style>
+</head>
+<body>
+
+    <div class="main-container">
+        <div class="header-box">
+            <input type="text" id="taskInput" placeholder="Add a new task...">
+            <button onclick="addTask()">Add Task</button>
+        </div>
+
+        <div class="board">
+            <div class="column" id="to-do" ondrop="drop(event)" ondragover="allowDrop(event)">
+                <h3>📝 TO DO</h3>
+            </div>
+            <div class="column" id="in-progress" ondrop="drop(event)" ondragover="allowDrop(event)">
+                <h3>⌛ IN PROGRESS</h3>
+            </div>
+            <div class="column" id="completed" ondrop="drop(event)" ondragover="allowDrop(event)">
+                <h3>✅ COMPLETED</h3>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function allowDrop(ev) { ev.preventDefault(); }
+
+        function drag(ev) { ev.dataTransfer.setData("text", ev.target.id); }
+
+        function drop(ev) {
+            ev.preventDefault();
+            const data = ev.dataTransfer.getData("text");
+            const draggedElement = document.getElementById(data);
+           
+            let target = ev.target;
+            while (target && !target.classList.contains('column')) {
+                target = target.parentElement;
+            }
+
+            if (target) {
+                target.appendChild(draggedElement);
+
+                if (target.id === "completed") {
+                    draggedElement.classList.add('completed-task');
+                    setTimeout(() => {
+                        alert("Task Completed Successfully");
+                    }, 50);
+                } else {
+                    draggedElement.classList.remove('completed-task');
+                }
+            }
+        }
+
+        function addTask() {
+            const input = document.getElementById('taskInput');
+            const name = input.value.trim();
+            if (!name) return;
+
+            const id = "task-" + Date.now();
+            const date = new Date().toLocaleDateString();
+
+            const card = document.createElement('div');
+            card.className = 'task-card';
+            card.id = id;
+            card.draggable = true;
+            card.ondragstart = drag;
+
+            card.innerHTML = `
+                <strong>${name}</strong>
+                <span class="date-tag">📅 ${date}</span>
+                <div class="status-msg">Task Completed Successfully</div>
+            `;
+
+            document.getElementById('to-do').appendChild(card);
+            input.value = "";
+        }
+    </script>
+</body>
+</html>
