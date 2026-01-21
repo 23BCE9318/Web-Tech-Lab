@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Multi Stage Form</title>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #f0f0f0;
+    display: flex;
+    justify-content: center;
+    margin-top: 40px;
+}
+
+.box {
+    background: white;
+    width: 400px;
+    padding: 20px;
+    border-radius: 5px;
+}
+
+.step {
+    display: none;
+}
+
+.step.active {
+    display: block;
+}
+
+input {
+    width: 100%;
+    padding: 8px;
+    margin: 6px 0;
+}
+
+button {
+    margin-top: 10px;
+    padding: 8px 12px;
+}
+
+.error {
+    color: red;
+    font-size: 14px;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 10px;
+    background: #ccc;
+    margin-bottom: 15px;
+}
+
+.progress {
+    height: 10px;
+    width: 0%;
+    background: green;
+}
+</style>
+</head>
+
+<body>
+
+<div class="box">
+
+<h2>Multi-Step Form</h2>
+
+<div class="progress-bar">
+    <div class="progress" id="progress"></div>
+</div>
+
+<form id="form">
+
+<!-- Stage 1 -->
+<div class="step active">
+    <h3>Stage 1</h3>
+    <input type="text" id="name" placeholder="Name">
+    <input type="email" id="email" placeholder="Email">
+    <div class="error"></div>
+    <button type="button" onclick="next()">Next</button>
+</div>
+
+<!-- Stage 2 -->
+<div class="step">
+    <h3>Stage 2</h3>
+    <input type="text" id="username" placeholder="Username">
+    <input type="password" id="password" placeholder="Password">
+    <div class="error"></div>
+    <button type="button" onclick="back()">Back</button>
+    <button type="button" onclick="next()">Next</button>
+</div>
+
+<!-- Stage 3 -->
+<div class="step">
+    <h3>Stage 3</h3>
+    <input type="text" id="phone" placeholder="10-digit Phone">
+    <div class="error"></div>
+    <button type="button" onclick="back()">Back</button>
+    <button type="button" onclick="next()">Next</button>
+</div>
+
+<!-- Stage 4 -->
+<div class="step">
+    <h3>Stage 4</h3>
+    <p>Confirm and submit</p>
+    <div class="error"></div>
+    <button type="button" onclick="back()">Back</button>
+    <button type="submit">Submit</button>
+</div>
+
+</form>
+</div>
+
+<script>
+let current = 0;
+let steps = document.querySelectorAll(".step");
+let progress = document.getElementById("progress");
+
+/* Temporary storage */
+let data = {};
+
+function showStep(i) {
+    steps.forEach(step => step.classList.remove("active"));
+    steps[i].classList.add("active");
+    progress.style.width = ((i + 1) / steps.length) * 100 + "%";
+}
+
+function next() {
+    if (validate()) {
+        saveData();
+        current++;
+        showStep(current);
+    }
+}
+
+function back() {
+    current--;
+    showStep(current);
+}
+
+function validate() {
+    let error = steps[current].querySelector(".error");
+    error.textContent = "";
+
+    if (current === 0) {
+        if (name.value === "" || email.value === "") {
+            error.textContent = "All fields required";
+            return false;
+        }
+    }
+
+    if (current === 1) {
+        if (username.value.length < 4 || password.value.length < 6) {
+            error.textContent = "Username ≥ 4, Password ≥ 6";
+            return false;
+        }
+    }
+
+    if (current === 2) {
+        if (!/^\d{10}$/.test(phone.value)) {
+            error.textContent = "Enter valid phone number";
+            return false;
+        }
+    }
+
+    return true;
+}
+
+function saveData() {
+    data.name = name.value;
+    data.email = email.value;
+    data.username = username.value;
+    data.phone = phone.value;
+}
+
+document.getElementById("form").addEventListener("submit", function(e) {
+    if (!validate()) {
+        e.preventDefault();
+    } else {
+        alert("Form Submitted Successfully");
+        console.log(data);
+        e.preventDefault();   // remove for real submit
+    }
+});
+</script>
+
+</body>
+</html>

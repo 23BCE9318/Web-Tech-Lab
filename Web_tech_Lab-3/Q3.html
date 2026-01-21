@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Dynamic Survey Builder</title>
+<style>
+/* Body background */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #e6e6fa; /* soft lavender background */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+/* Container card */
+.container {
+    background-color: #ffffff;
+    width: 450px;
+    padding: 30px 35px;
+    border-radius: 15px;
+    box-shadow: 0 12px 28px rgba(0,0,0,0.18);
+    border-left: 6px solid #8a2be2; /* deep purple accent */
+}
+
+/* Heading */
+h2 {
+    text-align: center;
+    margin-bottom: 25px;
+    color: #8a2be2; /* heading color */
+}
+
+/* Individual question box */
+.question {
+    margin-bottom: 20px;
+    padding: 12px;
+    border-radius: 8px;
+    background-color: #f9f4ff; /* very light purple */
+    transition: 0.3s;
+}
+
+.question:hover {
+    background-color: #f0e6ff; /* hover effect */
+}
+
+/* Text input */
+input[type="text"] {
+    width: 100%;
+    padding: 8px;
+    margin-top: 6px;
+    border-radius: 6px;
+    border: 1.5px solid #d6cfff;
+    font-size: 14px;
+    transition: 0.3s;
+}
+
+input[type="text"]:focus {
+    border-color: #8a2be2;
+    outline: none;
+    box-shadow: 0 0 6px rgba(138,43,226,0.3);
+}
+
+/* Radio & checkbox spacing */
+input[type="radio"], input[type="checkbox"] {
+    margin-right: 6px;
+    cursor: pointer;
+}
+
+/* Error messages */
+.error {
+    color: #d7268a; /* deep pink/purple */
+    font-size: 13px;
+    margin-top: 5px;
+}
+
+/* Submit button */
+button {
+    width: 100%;
+    padding: 12px;
+    background: linear-gradient(135deg, #8a2be2, #a76eff); /* purple gradient button */
+    color: white;
+    border: none;
+    border-radius: 25px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+button:hover {
+    background: linear-gradient(135deg, #a76eff, #8a2be2);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Survey Form</h2>
+    <form id="surveyForm" onsubmit="return false;"></form>
+    <button onclick="submitSurvey()">Submit</button>
+</div>
+
+<script>
+const questions = [
+    { id: "q1", text: "Your Name", type: "text", required: true, maxLength: 20 },
+    { id: "q2", text: "Gender", type: "radio", options: ["Male", "Female"], required: true },
+    { id: "q3", text: "Skills", type: "checkbox", options: ["HTML", "CSS", "JS"], min: 1 }
+];
+
+const form = document.getElementById("surveyForm");
+
+questions.forEach(q => {
+    const div = document.createElement("div");
+    div.className = "question";
+
+    const label = document.createElement("label");
+    label.innerText = q.text;
+    div.appendChild(label);
+    div.appendChild(document.createElement("br"));
+
+    if (q.type === "text") {
+        const input = document.createElement("input");
+        input.type = "text";
+        input.id = q.id;
+        input.maxLength = q.maxLength;
+        div.appendChild(input);
+    }
+
+    if (q.type === "radio" || q.type === "checkbox") {
+        q.options.forEach(opt => {
+            const input = document.createElement("input");
+            input.type = q.type;
+            input.name = q.id;
+            input.value = opt;
+            div.appendChild(input);
+            div.appendChild(document.createTextNode(" " + opt));
+            div.appendChild(document.createElement("br"));
+        });
+    }
+
+    const error = document.createElement("div");
+    error.className = "error";
+    error.id = q.id + "-error";
+    div.appendChild(error);
+
+    form.appendChild(div);
+});
+
+function submitSurvey() {
+    let isValid = true;
+
+    questions.forEach(q => {
+        document.getElementById(q.id + "-error").innerText = "";
+
+        if (q.type === "text") {
+            const val = document.getElementById(q.id).value.trim();
+            if (q.required && val === "") {
+                showError(q.id, "This field is required");
+                isValid = false;
+            } else if (val.length > q.maxLength) {
+                showError(q.id, `Maximum ${q.maxLength} characters allowed`);
+                isValid = false;
+            }
+        }
+
+        if (q.type === "radio") {
+            if (!document.querySelector(`input[name="${q.id}"]:checked`)) {
+                showError(q.id, "Select one option");
+                isValid = false;
+            }
+        }
+
+        if (q.type === "checkbox") {
+            const selectedCount = document.querySelectorAll(`input[name="${q.id}"]:checked`).length;
+            if (selectedCount < q.min) {
+                showError(q.id, `Select at least ${q.min} option(s)`);
+                isValid = false;
+            }
+        }
+    });
+
+    if (isValid) {
+        alert("Survey Submitted Successfully!");
+    }
+}
+
+function showError(id, msg) {
+    document.getElementById(id + "-error").innerText = msg;
+}
+</script>
+
+</body>
+</html>

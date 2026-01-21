@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Adaptive Registration System</title>
+<style>
+    :root {
+        --blue-dark: #0047b3;
+        --blue-light: #cce0ff;
+        --white: #ffffff;
+        --gray-dark: #666666;
+    }
+
+    body {
+        font-family: Arial, sans-serif;
+        background-color: var(--blue-light);
+        display: flex;
+        justify-content: center;
+        padding: 50px;
+    }
+
+    form {
+        background: var(--white);
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        width: 100%;
+        max-width: 500px;
+    }
+
+    h2 {
+        text-align: center;
+        color: var(--blue-dark);
+        margin-bottom: 20px;
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    label {
+        display: block;
+        font-weight: bold;
+        margin-bottom: 5px;
+        color: var(--blue-dark);
+    }
+
+    input, select, textarea {
+        width: 100%;
+        padding: 8px;
+        border-radius: 5px;
+        border: 1px solid var(--blue-dark);
+        font-size: 1rem;
+        box-sizing: border-box;
+    }
+
+    input.invalid, select.invalid, textarea.invalid {
+        border-color: red;
+        background-color: #ffe6e6;
+    }
+
+    small {
+        color: red;
+        display: none;
+    }
+
+    button {
+        background-color: var(--blue-dark);
+        color: var(--white);
+        padding: 10px 15px;
+        border: none;
+        border-radius: 5px;
+        font-weight: bold;
+        cursor: pointer;
+        width: 100%;
+        font-size: 1rem;
+    }
+
+    button:hover {
+        background-color: #002f80;
+    }
+
+    .hidden {
+        display: none;
+    }
+</style>
+</head>
+<body>
+
+<form id="registrationForm">
+    <h2>Register</h2>
+
+    <!-- Role selection moved to top -->
+    <div class="form-group">
+        <label for="role">Role</label>
+        <select id="role">
+            <option value="Student">Student</option>
+            <option value="Teacher">Teacher</option>
+            <option value="Admin">Admin</option>
+        </select>
+        <small>Role is required</small>
+    </div>
+
+    <div class="form-group">
+        <label for="name">Full Name</label>
+        <input type="text" id="name" placeholder="Enter full name">
+        <small>Name is required</small>
+    </div>
+
+    <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" placeholder="Enter email">
+        <small>Invalid email</small>
+    </div>
+
+    <!-- Age moved after Email -->
+    <div class="form-group">
+        <label for="age">Age</label>
+        <input type="number" id="age" placeholder="Enter your age">
+        <small>Age is required</small>
+    </div>
+
+    <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" placeholder="Enter password">
+        <small>Password is too weak</small>
+    </div>
+
+    <div class="form-group">
+        <label for="confirmPassword">Confirm Password</label>
+        <input type="password" id="confirmPassword" placeholder="Confirm password">
+        <small>Passwords do not match</small>
+    </div>
+
+    <div class="form-group hidden" id="skillsGroup">
+        <label for="skills">Skills (comma separated)</label>
+        <textarea id="skills" placeholder="Enter skills"></textarea>
+        <small>Skills are required for Teacher/Admin</small>
+    </div>
+
+    <button type="submit">Register</button>
+</form>
+
+<script>
+const form = document.getElementById('registrationForm');
+const nameInput = document.getElementById('name');
+const emailInput = document.getElementById('email');
+const passwordInput = document.getElementById('password');
+const confirmPasswordInput = document.getElementById('confirmPassword');
+const ageInput = document.getElementById('age');
+const roleSelect = document.getElementById('role');
+const skillsGroup = document.getElementById('skillsGroup');
+const skillsInput = document.getElementById('skills');
+
+let validationRules = {};
+
+// Show/hide skills field based on role
+roleSelect.addEventListener('change', () => {
+    const role = roleSelect.value;
+    if(role === 'Teacher' || role === 'Admin'){
+        skillsGroup.classList.remove('hidden');
+    } else {
+        skillsGroup.classList.add('hidden');
+    }
+    setValidationRules(role);
+});
+
+// Set dynamic validation rules
+function setValidationRules(role){
+    validationRules = {
+        name: { required: true },
+        email: { required: true, domain: (role === 'Admin') ? 'admin.com' : null },
+        age: { required: true },
+        password: { 
+            required: true, 
+            minLength: (role === 'Admin') ? 10 : 6,
+            mustInclude: (role === 'Admin') ? /[A-Z]/ : null
+        },
+        confirmPassword: { required: true, match: 'password' },
+        skills: { required: (role === 'Teacher' || role === 'Admin') }
+    };
+}
+
+// Validation function
+function validateField(input, rules){
+    let valid = true;
+    let value = input.value.trim();
+    let small = input.nextElementSibling;
+
+    if(rules.required && value === ''){
+        valid = false;
+    }
+    if(rules.domain && !value.endsWith('@' + rules.domain)){
+        valid = false;
+    }
+    if(rules.minLength && value.length < rules.minLength){
+        valid = false;
+    }
+    if(rules.mustInclude && !rules.mustInclude.test(value)){
+        valid = false;
+    }
+    if(rules.match){
+        const matchValue = document.getElementById(rules.match).value;
+        if(value !== matchValue) valid = false;
+    }
+
+    if(!valid){
+        input.classList.add('invalid');
+        small.style.display = 'block';
+    } else {
+        input.classList.remove('invalid');
+        small.style.display = 'none';
+    }
+
+    return valid;
+}
+
+// Real-time validation
+[nameInput,emailInput,ageInput,passwordInput,confirmPasswordInput,skillsInput].forEach(input => {
+    input.addEventListener('input', () => {
+        const field = input.id;
+        const rules = validationRules[field];
+        if(rules) validateField(input, rules);
+    });
+});
+
+// On form submit
+form.addEventListener('submit', e => {
+    e.preventDefault();
+    let isValid = true;
+
+    Object.keys(validationRules).forEach(field => {
+        const input = document.getElementById(field);
+        if(input){
+            if(!validateField(input, validationRules[field])) isValid = false;
+        }
+    });
+
+    if(isValid){
+        alert('Registration successful!');
+        form.reset();
+        skillsGroup.classList.add('hidden');
+    }
+});
+
+// Initialize rules for default selected role
+setValidationRules(roleSelect.value);
+</script>
+
+</body>
+</html>
