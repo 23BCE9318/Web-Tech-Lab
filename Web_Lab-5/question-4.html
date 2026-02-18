@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventory Management System | Final Version</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --text: #1e293b;
+            --border: #e2e8f0;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; }
+        body { background: var(--bg); color: var(--text); padding: 2rem; }
+        .container { max-width: 1000px; margin: 0 auto; }
+
+        /* Stats Section */
+        .stats-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem; margin-bottom: 2rem;
+        }
+        .stat-card {
+            background: var(--surface); padding: 1.5rem; border-radius: 8px;
+            border: 1px solid var(--border); box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            border-left: 5px solid var(--primary);
+        }
+        .stat-card h3 { font-size: 0.8rem; color: #64748b; text-transform: uppercase; }
+        .stat-card p { font-size: 1.8rem; font-weight: 700; margin-top: 5px; }
+
+        /* Management Panel */
+        .panel {
+            background: var(--surface); padding: 1.5rem; border-radius: 8px;
+            border: 1px solid var(--border); margin-bottom: 2rem;
+        }
+        .form-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem; margin-bottom: 1.5rem;
+        }
+        .group { display: flex; flex-direction: column; gap: 5px; }
+        label { font-size: 0.8rem; font-weight: 600; }
+        input, select { padding: 0.6rem; border: 1px solid var(--border); border-radius: 4px; font-size: 0.9rem; }
+        
+        .actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+        .btn { padding: 0.6rem 1.2rem; border-radius: 4px; border: none; font-weight: 700; cursor: pointer; transition: 0.2s; }
+        .btn-add { background: var(--primary); color: white; }
+        .btn-add:hover { background: #1d4ed8; }
+        .search-bar { flex-grow: 1; padding: 0.6rem; border: 1px solid var(--border); border-radius: 4px; background: #fff; }
+
+        /* Table Section */
+        .table-wrap { background: var(--surface); border-radius: 8px; border: 1px solid var(--border); overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        th { background: #f1f5f9; padding: 1rem; font-size: 0.8rem; color: #475569; border-bottom: 2px solid var(--border); }
+        td { padding: 1rem; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+
+        /* Requirement: Conditional Formatting (Low Stock) */
+        .low-stock-row { background-color: #fffbeb; }
+        .badge-warn { font-size: 0.7rem; background: var(--warning); color: white; padding: 2px 6px; border-radius: 4px; font-weight: bold; }
+
+        .op { color: var(--primary); cursor: pointer; font-weight: 600; margin-right: 15px; }
+        .op-del { color: var(--danger); }
+    </style>
+</head>
+<body onload="initApp()">
+
+<div class="container">
+    <header style="margin-bottom: 2rem;">
+        <h1 style="color: var(--primary)">Inventory Dashboard</h1>
+        <p style="color: #64748b">Complete CRUD System with JSON Integration</p>
+    </header>
+
+    <div class="stats-grid">
+        <div class="stat-card"><h3>Inventory Value</h3><p id="totalVal">$0.00</p></div>
+        <div class="stat-card"><h3>Active SKUs</h3><p id="skuCount">0</p></div>
+        <div class="stat-card" style="border-left-color: var(--warning)"><h3>Low Stock Items</h3><p id="lowCount">0</p></div>
+    </div>
+
+    <div class="panel">
+        <div class="form-grid">
+            <div class="group"><label>ID</label><input type="text" id="pid" placeholder="e.g. 101"></div>
+            <div class="group"><label>Product Name</label><input type="text" id="pname"></div>
+            <div class="group">
+                <label>Category</label>
+                <select id="pcat">
+                    <option value="Hardware">Hardware</option>
+                    <option value="Peripherals">Peripherals</option>
+                    <option value="Software">Software</option>
+                </select>
+            </div>
+            <div class="group"><label>Price ($)</label><input type="number" id="pprice" step="0.01"></div>
+            <div class="group"><label>Stock</label><input type="number" id="pstock"></div>
+        </div>
+        <div class="actions">
+            <button class="btn btn-add" id="actionBtn" onclick="handleAdd()">Add Product</button>
+            <input type="text" id="search" onkeyup="handleSearch()" placeholder="Search categories..." class="search-bar">
+        </div>
+    </div>
+
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>SKU ID</th>
+                    <th>Product Details</th>
+                    <th>Category</th>
+                    <th>Unit Price</th>
+                    <th>Stock Qty</th>
+                    <th>Operations</th>
+                </tr>
+            </thead>
+            <tbody id="inventoryBody"></tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    let inventory = [];
+
+    // 1. AJAX: Fetch JSON Data
+    async function initApp() {
+        try {
+            const response = await fetch('inventory.json');
+            if (!response.ok) throw new Error("File not found");
+            inventory = await response.json();
+            renderUI();
+        } catch (err) {
+            // Fallback static data if JSON file is missing
+            inventory = [
+                {id: "P001", name: "Wireless Keyboard", category: "Peripherals", price: 45.00, stock: 3},
+                {id: "P002", name: "27-inch Monitor", category: "Hardware", price: 250.00, stock: 12}
+            ];
+            renderUI();
+        }
+    }
+
+    // 2. Render Logic & Calculations
+    function renderUI(dataToRender = inventory) {
+        const body = document.getElementById("inventoryBody");
+        body.innerHTML = "";
+        let grandTotal = 0;
+        let lowStockAlerts = 0;
+
+        dataToRender.forEach(item => {
+            const itemValue = item.price * item.stock;
+            grandTotal += itemValue;
+            
+            // Requirement: Conditional Formatting (Stock < 5)
+            const isLow = item.stock < 5;
+            if(isLow) lowStockAlerts++;
+
+            body.innerHTML += `
+                <tr class="${isLow ? 'low-stock-row' : ''}">
+                    <td><b>#${item.id}</b></td>
+                    <td>${item.name}</td>
+                    <td>${item.category}</td>
+                    <td>$${item.price.toFixed(2)}</td>
+                    <td>
+                        ${item.stock} ${isLow ? '<span class="badge-warn">LOW</span>' : ''}
+                    </td>
+                    <td>
+                        <span class="op" onclick="prepareEdit('${item.id}')">Edit</span>
+                        <span class="op op-del" onclick="handleDelete('${item.id}')">Delete</span>
+                    </td>
+                </tr>`;
+        });
+
+        // Update Stat Cards
+        document.getElementById("totalVal").innerText = "$" + grandTotal.toLocaleString();
+        document.getElementById("skuCount").innerText = inventory.length;
+        document.getElementById("lowCount").innerText = lowStockAlerts;
+    }
+
+    // 3. Create
+    function handleAdd() {
+        const id = v('pid'), nm = v('pname'), ct = v('pcat'), pr = parseFloat(v('pprice')), st = parseInt(v('pstock'));
+        if(!id || !nm || isNaN(pr) || isNaN(st)) return alert("Please fill all fields correctly.");
+
+        inventory.push({ id, name: nm, category: ct, price: pr, stock: st });
+        syncData();
+    }
+
+    // 4. Update
+    function prepareEdit(id) {
+        const item = inventory.find(i => i.id === id);
+        document.getElementById('pid').value = item.id;
+        document.getElementById('pid').disabled = true;
+        document.getElementById('pname').value = item.name;
+        document.getElementById('pprice').value = item.price;
+        document.getElementById('pstock').value = item.stock;
+
+        const btn = document.getElementById('actionBtn');
+        btn.innerText = "Save Changes";
+        btn.onclick = () => {
+            item.price = parseFloat(v('pprice'));
+            item.stock = parseInt(v('pstock'));
+            btn.innerText = "Add Product";
+            btn.onclick = handleAdd;
+            document.getElementById('pid').disabled = false;
+            syncData();
+        };
+    }
+
+    // 5. Delete
+    function handleDelete(id) {
+        inventory = inventory.filter(i => i.id !== id);
+        syncData();
+    }
+
+    // 6. Search (Filter)
+    function handleSearch() {
+        const term = v('search').toLowerCase();
+        const filtered = inventory.filter(i => i.category.toLowerCase().includes(term));
+        renderUI(filtered);
+    }
+
+    // Helpers
+    function v(id) { return document.getElementById(id).value; }
+    function syncData() {
+        renderUI();
+        ["pid","pname","pprice","pstock"].forEach(id => document.getElementById(id).value = "");
+    }
+</script>
+</body>
+</html>
