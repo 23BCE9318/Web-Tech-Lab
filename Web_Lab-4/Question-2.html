@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Search System | Lumiere Boutique</title>
+    <style>
+        /* --- QUIET LUXURY PALETTE --- */
+        :root {
+            --bg-deep: #0f1716; /* Deep Forest Slate */
+            --primary: #d4af37; /* Champagne Gold */
+            --secondary: #5eead4; /* Mint Crystal */
+            --card-bg: rgba(255, 255, 255, 0.03);
+            --border: rgba(255, 255, 255, 0.07);
+            --text-main: #f1f5f1;
+            --text-dim: #718885;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg-deep);
+            /* Subtle emerald glow in the top-left */
+            background-image: radial-gradient(circle at 0% 0%, #132a26 0%, #0f1716 70%);
+            color: var(--text-main);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 580px;
+            padding: 100px 20px;
+        }
+
+        /* --- TITLE --- */
+        h1 { 
+            text-align: center; 
+            font-weight: 800; 
+            letter-spacing: -1.5px; 
+            font-size: 3.5rem;
+            margin: 0;
+            background: linear-gradient(to bottom, #fff 50%, var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: var(--primary);
+            font-size: 0.8rem;
+            margin-bottom: 50px;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            font-weight: 600;
+            opacity: 0.8;
+        }
+
+        /* --- SEARCH BOX --- */
+        .search-box {
+            position: relative;
+            margin-bottom: 40px;
+        }
+
+        input {
+            width: 100%;
+            padding: 24px 35px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 100px; /* Modern pill shape */
+            color: white;
+            font-size: 1.1rem;
+            backdrop-filter: blur(20px);
+            transition: all 0.4s cubic-bezier(0.2, 1, 0.3, 1);
+            box-sizing: border-box;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: rgba(255, 255, 255, 0.06);
+            box-shadow: 0 0 30px rgba(212, 175, 55, 0.1);
+        }
+
+        /* --- PRODUCT CARDS --- */
+        .results-list { display: grid; gap: 18px; }
+
+        .item-card {
+            background: var(--card-bg);
+            padding: 24px 30px;
+            border-radius: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            border: 1px solid var(--border);
+            transition: 0.4s ease;
+            animation: fadeIn 0.6s ease forwards;
+        }
+
+        .item-card:hover {
+            border-color: var(--secondary);
+            transform: translateY(-5px);
+            background: rgba(94, 234, 212, 0.03);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .item-info h3 { margin: 0; font-size: 1.15rem; font-weight: 500; letter-spacing: 0.5px; }
+        .item-info p { 
+            margin: 5px 0 0; 
+            font-size: 0.65rem; 
+            color: var(--primary); 
+            font-weight: 700; 
+            text-transform: uppercase; 
+            letter-spacing: 2px;
+        }
+        
+        .item-price { 
+            font-size: 1.2rem; 
+            font-weight: 300; 
+            color: #fff;
+            opacity: 0.9;
+        }
+
+        /* --- MODAL --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(10, 15, 14, 0.95);
+            backdrop-filter: blur(20px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: #141f1d;
+            padding: 60px;
+            border-radius: 40px;
+            max-width: 440px;
+            width: 90%;
+            border: 1px solid var(--border);
+            position: relative;
+            text-align: center;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 30px; right: 30px;
+            background: none; border: none;
+            color: var(--text-dim);
+            font-size: 1.5rem; cursor: pointer;
+        }
+
+        .detail-badge {
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            padding: 6px 15px;
+            border-radius: 100px;
+            font-size: 0.65rem;
+            font-weight: 700;
+            display: inline-block;
+            margin-bottom: 25px;
+        }
+
+        .buy-btn {
+            margin-top: 40px;
+            width: 100%;
+            padding: 18px;
+            border-radius: 100px;
+            border: 1px solid var(--primary);
+            background: transparent;
+            color: var(--primary);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .buy-btn:hover { 
+            background: var(--primary);
+            color: var(--bg-deep);
+        }
+        
+        .status-text { text-align: center; color: var(--text-dim); padding: 50px; font-style: italic; }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <h1>Lumiere</h1>
+    <div class="subtitle">Product Search System</div>
+    
+    <div class="search-box">
+        <input type="text" id="searchBar" placeholder="Search the collection..." autocomplete="off">
+    </div>
+
+    <div id="resultsWrapper" class="results-list">
+        <div class="status-text">Your bespoke collection awaits...</div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="modal">
+    <div class="modal-content">
+        <button class="close-btn" id="closeModal">&times;</button>
+        <div id="modalBody"></div>
+    </div>
+</div>
+
+<script>
+    // COLLECTION DATA
+    const products = [
+        { id: 1, name: "Insulated Water Bottle", price: "$35", category: "Wellness", desc: "Double-walled stainless steel that keeps beverages crisp for 24 hours." },
+        { id: 2, name: "Canvas Daypack", price: "$85", category: "Travel", desc: "Water-resistant organic canvas with a padded sleeve for your essentials." },
+        { id: 3, name: "Polarized Sunglasses", price: "$120", category: "Accessories", desc: "Hand-polished acetate frames with premium UV protection lenses." },
+        { id: 4, name: "Ceramic Coffee Mug", price: "$28", category: "Home", desc: "Minimalist matte finish with an ergonomic handle for the perfect morning." },
+        { id: 5, name: "Leather Key Organizer", price: "$45", category: "Everyday", desc: "Quiet and compact carry crafted from full-grain vegetable-tanned leather." }
+    ];
+
+    const searchBar = document.getElementById('searchBar');
+    const resultsWrapper = document.getElementById('resultsWrapper');
+    const modal = document.getElementById('modal');
+    const modalBody = document.getElementById('modalBody');
+    const closeModal = document.getElementById('closeModal');
+
+    // Performance Optimization: Debounce
+    function debounce(fn, delay) {
+        let timer;
+        return (...args) => {
+            clearTimeout(timer);
+            timer = setTimeout(() => fn(...args), delay);
+        }
+    }
+
+    // Search Logic
+    async function searchProducts(query) {
+        if (!query) {
+            resultsWrapper.innerHTML = '<div class="status-text">Your bespoke collection awaits...</div>';
+            return;
+        }
+        resultsWrapper.innerHTML = '<div class="status-text">✦ Filtering for quality...</div>';
+        
+        // Simulating subtle async delay for ethereal feel
+        await new Promise(r => setTimeout(r, 450));
+        
+        const filtered = products.filter(p => 
+            p.name.toLowerCase().includes(query.toLowerCase()) || 
+            p.category.toLowerCase().includes(query.toLowerCase())
+        );
+        renderResults(filtered);
+    }
+
+    // UI Rendering
+    function renderResults(data) {
+        if (data.length === 0) {
+            resultsWrapper.innerHTML = '<div class="status-text">No items matched your refined search.</div>';
+            return;
+        }
+        resultsWrapper.innerHTML = data.map(item => `
+            <div class="item-card" onclick="showDetails(${item.id})">
+                <div class="item-info">
+                    <p>${item.category}</p>
+                    <h3>${item.name}</h3>
+                </div>
+                <div class="item-price">${item.price}</div>
+            </div>
+        `).join('');
+    }
+
+    // Modal Interactions
+    function showDetails(id) {
+        const product = products.find(p => p.id === id);
+        if (!product) return;
+        modalBody.innerHTML = `
+            <span class="detail-badge">${product.category}</span>
+            <h2 style="margin: 0 0 15px 0; color: #fff; font-weight: 400;">${product.name}</h2>
+            <p style="color: var(--text-dim); line-height: 2;">${product.desc}</p>
+            <h3 style="color: var(--primary); font-size: 2.2rem; margin: 30px 0; font-weight: 200;">${product.price}</h3>
+            <button class="buy-btn">Acquire Now</button>
+        `;
+        modal.style.display = 'flex';
+    }
+
+    // Event Listeners
+    searchBar.addEventListener('input', debounce((e) => searchProducts(e.target.value), 450));
+    closeModal.addEventListener('click', () => modal.style.display = 'none');
+    window.addEventListener('click', (e) => { if (e.target === modal) modal.style.display = 'none'; });
+</script>
+</body>
+</html>

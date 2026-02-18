@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exercise 4: AJAX Weather Dashboard</title>
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+
+        body {
+            /* Background is now fully visible with a very light tint */
+            background: linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.1)), 
+                        url('https://images.unsplash.com/photo-1513002749550-c59d786b8e6c?auto=format&fit=crop&w=1920&q=80');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            height: 100vh;
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            /* Text shadow applied globally to ensure visibility on bright image */
+            color: white;
+            text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.7);
+        }
+
+        .container { 
+            display: flex; 
+            gap: 30px; 
+            width: 95%; 
+            max-width: 1000px; 
+        }
+
+        .glass-box {
+            /* Higher transparency (0.1) so the background shows through clearly */
+            background: rgba(255, 255, 255, 0.15); 
+            backdrop-filter: blur(15px);
+            border-radius: 35px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .left-panel { flex: 1; text-align: center; }
+        .left-panel h1 { font-size: 2.5rem; font-weight: 700; margin-bottom: 25px; }
+
+        input { 
+            width: 100%; padding: 15px; border-radius: 12px; border: none; 
+            margin-bottom: 12px; font-size: 1rem; outline: none;
+            color: #333; background: rgba(255, 255, 255, 0.9);
+            text-shadow: none; /* No shadow inside input for clean typing */
+        }
+
+        .btn-search { 
+            background: #0076cc; color: white; border: none; 
+            padding: 12px 30px; border-radius: 10px; cursor: pointer;
+            font-weight: bold; width: 100%; transition: 0.3s;
+            text-shadow: none;
+        }
+        .btn-search:hover { background: #005bb5; transform: scale(1.02); }
+
+        #loader { 
+            display: none; width: 30px; height: 30px; border: 4px solid rgba(255,255,255,0.3);
+            border-top: 4px solid white; border-radius: 50%;
+            animation: spin 1s linear infinite; margin: 15px auto;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .right-panel { flex: 1.5; }
+        .header-title { text-align: center; margin-bottom: 20px; opacity: 1; letter-spacing: 2px; font-weight: 800; }
+        .main-weather { display: flex; justify-content: space-between; align-items: center; }
+        .big-temp { font-size: 7rem; font-weight: 800; }
+
+        .stats-column {
+            border-left: 2px solid rgba(255,255,255,0.5);
+            padding-left: 30px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px 25px;
+        }
+        .stats-column p { font-size: 0.85rem; color: #fff; text-transform: uppercase; font-weight: 900; }
+        .stats-column b { font-size: 1.3rem; display: block; color: #fff; }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+    <div class="glass-box left-panel">
+        <h1>Atmosphere</h1>
+        <input type="text" id="cityInput" placeholder="Type City Name...">
+        <div id="loader"></div>
+        <button class="btn-search" onclick="getWeather()">Fetch Live Data</button>
+    </div>
+
+    <div class="glass-box right-panel">
+        <p class="header-title">CURRENT STATISTICS</p>
+
+        <div class="main-weather">
+            <div>
+                <h2 id="cityName">📍 Location</h2>
+                <div class="big-temp" id="mainTemp">--°</div>
+                <p id="mainDesc" style="text-transform: capitalize; font-weight: 800;">Waiting for Search...</p>
+            </div>
+
+            <div class="stats-column">
+                <div><p>Humidity</p><b id="hum">--%</b></div>
+                <div><p>Wind</p><b id="wind">-- m/s</b></div>
+                <div><p>Pressure</p><b id="pres">--</b></div>
+                <div><p>Feels Like</p><b id="feels">--°</b></div>
+                <div style="grid-column: span 2;">
+                    <p>Last Searched</p><b id="lastCityDisplay">None</b>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const apiKey = "b852c4e9316273d3276cae8356bce833";
+    let lastSearchedCity = ""; 
+
+    async function getWeather() {
+        const city = document.getElementById("cityInput").value;
+        const loader = document.getElementById("loader");
+        
+        if (!city) {
+            alert("Please enter a city name.");
+            return;
+        }
+
+        loader.style.display = "block";
+
+        try {
+            const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${apiKey}`);
+            const data = await response.json();
+
+            if (data.cod !== 200) {
+                alert("Error: " + data.message);
+                loader.style.display = "none";
+                return;
+            }
+
+            lastSearchedCity = data.name;
+            document.getElementById("lastCityDisplay").innerText = lastSearchedCity;
+
+            document.getElementById("cityName").innerText = "📍 " + data.name;
+            document.getElementById("mainTemp").innerText = Math.round(data.main.temp) + "°";
+            document.getElementById("mainDesc").innerText = data.weather[0].description;
+            document.getElementById("hum").innerText = data.main.humidity + "%";
+            document.getElementById("pres").innerText = data.main.pressure + " hPa";
+            document.getElementById("wind").innerText = data.wind.speed + " m/s";
+            document.getElementById("feels").innerText = Math.round(data.main.feels_like) + "°";
+
+        } catch (error) {
+            alert("Network Error: Connection failed.");
+        } finally {
+            loader.style.display = "none";
+        }
+    }
+</script>
+</body>
+</html>

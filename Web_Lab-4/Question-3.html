@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Student Management System</title>
+    <style>
+        :root {
+            --bg: #0f172a;
+            --box-bg: #1e293b;
+            --accent: #38bdf8;
+            --border: #334155;
+            --text: #f1f5f9;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            margin: 0; padding: 50px;
+            display: flex; justify-content: center;
+        }
+
+        .container { width: 100%; max-width: 1200px; }
+
+        header { 
+            text-align: left; 
+            border-bottom: 2px solid var(--accent);
+            padding-bottom: 15px; 
+            margin-bottom: 30px; 
+        }
+        
+        h2 { margin: 0; text-transform: uppercase; letter-spacing: 2px; font-weight: 300; }
+
+        .control-row {
+            display: flex;
+            align-items: flex-end;
+            gap: 12px;
+            background: var(--box-bg);
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            margin-bottom: 30px;
+            box-shadow: 0 10px 15px rgba(0,0,0,0.2);
+        }
+
+        .input-item { display: flex; flex-direction: column; flex: 1; gap: 5px; }
+        .input-item label { font-size: 10px; text-transform: uppercase; color: var(--accent); font-weight: bold; }
+
+        input {
+            background: #0f172a;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 10px;
+            color: white;
+            outline: none;
+        }
+
+        input:focus { border-color: var(--accent); }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+        }
+
+        .btn-save { background: var(--accent); color: #0f172a; }
+        .btn-save:hover { background: white; transform: translateY(-1px); }
+        .btn-reset { background: transparent; color: #94a3b8; border: 1px solid var(--border); }
+
+        .table-box {
+            background: var(--box-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        table { width: 100%; border-collapse: collapse; }
+        th { background: rgba(0,0,0,0.2); text-align: left; padding: 15px; font-size: 0.7rem; color: #94a3b8; text-transform: uppercase; }
+        td { padding: 15px; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+        
+        .id-text { color: var(--accent); font-weight: bold; font-family: monospace; }
+        .op-btn { cursor: pointer; font-weight: bold; font-size: 0.7rem; margin-right: 15px; }
+        .edit-txt { color: #fbbf24; }
+        .del-txt { color: #f87171; }
+
+        #toast {
+            position: fixed; bottom: 20px; right: 20px;
+            padding: 12px 25px; border-radius: 4px;
+            background: #fff; color: #000; font-weight: bold;
+            font-size: 0.8rem; display: none; box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header><h2>Student Management System</h2></header>
+
+    <div class="control-row">
+        <div class="input-item">
+            <label>Student ID</label>
+            <input type="text" id="sid" placeholder="Enter ID">
+        </div>
+        <div class="input-item">
+            <label>Full Name</label>
+            <input type="text" id="sname" placeholder="Name">
+        </div>
+        <div class="input-item">
+            <label>Department</label>
+            <input type="text" id="sdept" placeholder="Dept">
+        </div>
+        <div class="input-item">
+            <label>Marks</label>
+            <input type="number" id="smarks" placeholder="0-100">
+        </div>
+        <button class="btn btn-save" id="mainBtn" onclick="executeCRUD()">Save</button>
+        <button class="btn btn-reset" onclick="clearUI()">Clear</button>
+    </div>
+
+    <div class="table-box">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Dept</th>
+                    <th>Marks</th>
+                    <th>Operations</th>
+                </tr>
+            </thead>
+            <tbody id="registryBody"></tbody>
+        </table>
+    </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+    // Initial data with clean IDs
+    let studentDB = [
+        { id: "101", name: "Julian Pierce", dept: "IT", marks: 92 },
+        { id: "102", name: "Sophia Vane", dept: "Architecture", marks: 88 }
+    ];
+    let updateID = null;
+
+    function refresh() {
+        const tbody = document.getElementById('registryBody');
+        tbody.innerHTML = studentDB.map(s => `
+            <tr>
+                <td class="id-text">${s.id}</td>
+                <td>${s.name}</td>
+                <td style="color:#94a3b8">${s.dept}</td>
+                <td>${s.marks}</td>
+                <td>
+                    <span class="op-btn edit-txt" onclick="editMode('${s.id}')">EDIT</span>
+                    <span class="op-btn del-txt" onclick="deleteMode('${s.id}')">DELETE</span>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    async function executeCRUD() {
+        const id = document.getElementById('sid').value;
+        const name = document.getElementById('sname').value;
+        const dept = document.getElementById('sdept').value;
+        const marks = document.getElementById('smarks').value;
+
+        if(!id || !name || !dept || !marks) return showStatus("400: BAD REQUEST - FILL ALL BOXES");
+
+        showStatus("✦ SENDING AJAX REQUEST...");
+        await new Promise(r => setTimeout(r, 500)); 
+
+        if(updateID) {
+            const i = studentDB.findIndex(s => s.id === updateID);
+            studentDB[i] = { id, name, dept, marks };
+            showStatus("200: OK - RECORD UPDATED");
+        } else {
+            if(studentDB.find(s => s.id === id)) return showStatus("409: CONFLICT - ID EXISTS");
+            studentDB.push({ id, name, dept, marks });
+            showStatus("201: CREATED - SUCCESS");
+        }
+        clearUI();
+        refresh();
+    }
+
+    async function deleteMode(id) {
+        if(!confirm("Purge record?")) return;
+        showStatus("✦ EXECUTING DELETE...");
+        await new Promise(r => setTimeout(r, 400));
+        studentDB = studentDB.filter(s => s.id !== id);
+        showStatus("204: NO CONTENT - DELETED");
+        refresh();
+    }
+
+    function editMode(id) {
+        const s = studentDB.find(x => x.id === id);
+        document.getElementById('sid').value = s.id;
+        document.getElementById('sid').disabled = true;
+        document.getElementById('sname').value = s.name;
+        document.getElementById('sdept').value = s.dept;
+        document.getElementById('smarks').value = s.marks;
+        updateID = id;
+        document.getElementById('mainBtn').innerText = "Update";
+    }
+
+    function clearUI() {
+        document.querySelectorAll('input').forEach(i => i.value = "");
+        document.getElementById('sid').disabled = false;
+        document.getElementById('mainBtn').innerText = "Save";
+        updateID = null;
+    }
+
+    function showStatus(msg) {
+        const t = document.getElementById('toast');
+        t.innerText = msg;
+        t.style.display = 'block';
+        setTimeout(() => t.style.display = 'none', 3000);
+    }
+
+    refresh();
+</script>
+</body>
+</html>

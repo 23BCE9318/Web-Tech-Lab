@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Username Availability</title>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.container {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(255, 255, 255, 0.95) 50%);
+    backdrop-filter: blur(20px);
+    padding: 48px 40px;
+    border-radius: 24px;
+    box-shadow:
+        0 25px 50px rgba(102, 126, 234, 0.15),
+        0 0 0 1px rgba(102, 126, 234, 0.2);
+    max-width: 420px;
+    width: 100%;
+    border: 1px solid rgba(102, 126, 234, 0.3);
+    position: relative;
+}
+
+h1 {
+    text-align: center;
+    color: #2d3748;
+    margin-bottom: 36px;
+    font-size: 28px;
+    font-weight: 600;
+}
+
+.form-group {
+    position: relative;
+    margin-bottom: 32px;
+}
+
+label {
+    display: block;
+    margin-bottom: 12px;
+    color: #4a5568;
+    font-weight: 500;
+}
+
+input {
+    width: 100%;
+    padding: 16px;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 16px;
+    transition: 0.3s;
+}
+
+input:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+}
+
+.status {
+    position: absolute;
+    right: 15px;
+    top: 48px;
+    font-size: 18px;
+    opacity: 0;
+    transition: 0.3s;
+}
+
+.status.show {
+    opacity: 1;
+}
+
+.feedback {
+    padding: 14px;
+    border-radius: 12px;
+    margin-top: 12px;
+    font-size: 14px;
+    display: none;
+}
+
+/* Available Style */
+.feedback.available {
+    background: #e6fffa;
+    color: #047857;
+    border: 1px solid #34d399;
+}
+
+/* Checking Style */
+.feedback.checking {
+    background: #e0e7ff;
+    color: #3730a3;
+    border: 1px solid #6366f1;
+}
+
+/* TAKEN STYLE (New Modern Warning Style) */
+.feedback.taken {
+    background: #fff5f5;
+    color: #c53030;
+    border-left: 6px solid #e53e3e;
+    box-shadow: 0 4px 12px rgba(229, 62, 62, 0.15);
+    animation: shake 0.3s ease-in-out;
+}
+
+/* Shake Animation */
+@keyframes shake {
+    0% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    50% { transform: translateX(5px); }
+    75% { transform: translateX(-5px); }
+    100% { transform: translateX(0); }
+}
+
+button {
+    width: 100%;
+    padding: 16px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+button:disabled {
+    background: #a0aec0;
+    cursor: not-allowed;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+    <h1>Username Availability</h1>
+
+    <form id="form">
+        <div class="form-group">
+            <label>Username</label>
+            <input type="text" id="username" placeholder="Enter username" required minlength="3">
+            <div class="status" id="status"></div>
+            <div class="feedback" id="feedback"></div>
+        </div>
+
+        <button type="submit" id="submit" disabled>Create Account</button>
+    </form>
+</div>
+
+<script>
+
+// Simulated server database
+const existingUsernames = [
+    'john', 'admin', 'user', 'test', 'guest', 'developer',
+    'alex', 'sarah', 'mike', 'lisa', 'chris', 'anna'
+];
+
+const elements = {
+    input: document.getElementById('username'),
+    feedback: document.getElementById('feedback'),
+    status: document.getElementById('status'),
+    submit: document.getElementById('submit'),
+    form: document.getElementById('form')
+};
+
+let isAvailable = false;
+
+// Debounce function
+function debounce(func, delay) {
+    let timeout;
+    return function(...args) {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(this, args), delay);
+    };
+}
+
+// Simulated AJAX request
+async function checkUsername(username) {
+
+    elements.status.textContent = "⏳";
+    elements.status.classList.add("show");
+
+    elements.feedback.style.display = "block";
+    elements.feedback.className = "feedback checking";
+    elements.feedback.textContent = "Checking availability...";
+
+    elements.submit.disabled = true;
+
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    const exists = existingUsernames.includes(username.toLowerCase());
+
+    if (exists) {
+        elements.status.textContent = "✖";
+        elements.status.style.color = "#e53e3e";
+
+        elements.feedback.className = "feedback taken";
+        elements.feedback.innerHTML = "⚠ Username already taken";
+        isAvailable = false;
+    } else {
+        elements.status.textContent = "✓";
+        elements.status.style.color = "#047857";
+
+        elements.feedback.className = "feedback available";
+        elements.feedback.textContent = "Username available";
+        isAvailable = true;
+    }
+
+    elements.submit.disabled = !isAvailable;
+}
+
+// Input listener with debounce
+elements.input.addEventListener("input", debounce(function() {
+    const username = this.value.trim();
+
+    if (username.length < 3) {
+        elements.feedback.style.display = "none";
+        elements.status.classList.remove("show");
+        elements.submit.disabled = true;
+        return;
+    }
+
+    checkUsername(username);
+
+}, 500));
+
+// Prevent form submission if unavailable
+elements.form.addEventListener("submit", function(e) {
+    e.preventDefault();
+
+    if (!isAvailable) {
+        alert("Please choose an available username.");
+    } else {
+        alert("Account created successfully!");
+        elements.form.reset();
+        elements.feedback.style.display = "none";
+        elements.status.classList.remove("show");
+        elements.submit.disabled = true;
+    }
+});
+
+</script>
+
+</body>
+</html>
