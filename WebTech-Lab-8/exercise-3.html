@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Course Enrollment - ES6 Exercise 3</title>
+    <style>
+        body {
+            font-family: 'Times New Roman', Times, serif;
+            margin: 40px;
+            line-height: 1.6;
+        }
+        h3 {
+            font-size: 24px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #000;
+            padding-bottom: 10px;
+        }
+        #output {
+            font-size: 18px;
+            font-weight: bold;
+            background: #f9f9f9;
+            padding: 20px;
+            border: 2px solid #ccc;
+            border-radius: 5px;
+            margin-top: 20px;
+            white-space: pre-line;
+        }
+    </style>
+</head>
+<body>
+    <h3>Course Enrollment</h3>
+    <p id="output"></p>
+
+    <script>
+        // ES6 Class definition
+        class Course {
+            constructor(courseName, instructor) {
+                this.courseName = courseName;
+                this.instructor = instructor;
+            }
+            
+            displayCourse() {
+                return `Course: ${this.courseName}, Instructor: ${this.instructor}`;
+            }
+        }
+
+        // Create course instance
+        let course1 = new Course("Web Technologies", "Dr.Krishna");
+        
+        // ES6 Promise for enrollment
+        let enrollCourse = new Promise((resolve, reject) => {
+            let seatsAvailable = true;
+            if(seatsAvailable)
+                resolve("Enrollment Successful");
+            else
+                reject("Course Full");
+        });
+
+        // Execute promise and display results
+        enrollCourse
+            .then(msg => {
+                document.getElementById("output").innerHTML = 
+                    `${course1.displayCourse()}
+
+${msg}`;
+            })
+            .catch(err => {
+                document.getElementById("output").innerHTML = 
+                    `${course1.displayCourse()}
+
+${err}`;
+            });
+    </script>
+</body>
+</html>

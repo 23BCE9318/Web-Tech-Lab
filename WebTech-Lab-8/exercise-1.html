@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Student Marks Calculator</title>
+    <style>
+        body {
+            font-family: 'Times New Roman', Times, serif;
+            margin: 40px;
+            line-height: 1.6;
+        }
+        h3 {
+            font-size: 24px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #000;
+            padding-bottom: 10px;
+        }
+        #output {
+            font-size: 18px;
+            font-weight: bold;
+            background: #f9f9f9;
+            padding: 20px;
+            border: 2px solid #ccc;
+            border-radius: 5px;
+            margin-top: 20px;
+            white-space: pre-line;
+        }
+    </style>
+</head>
+<body>
+    <h3>Student Marks Calculator</h3>
+    <p id="output"></p>
+
+    <script>
+        // ES6 JavaScript code starts here
+        let studentName = "Arun";
+        let mark1 = 85;  // Math
+        let mark2 = 90;  // Science  
+        let mark3 = 88;  // English
+
+        // Arrow function to calculate average (ES6 feature)
+        const calculateAverage = (m1, m2, m3) => {
+            return (m1 + m2 + m3) / 3;
+        };
+
+        let totalMarks = mark1 + mark2 + mark3;
+        let average = calculateAverage(mark1, mark2, mark3);
+
+        // Display using template literals (ES6 feature)
+        document.getElementById("output").innerHTML = 
+            `Student Name: ${studentName}
+
+Math:          ${mark1}
+Science:       ${mark2}
+English:       ${mark3}
+--------------------------------
+Total Marks:   ${totalMarks}
+Average Marks: ${average.toFixed(2)}`;
+    </script>
+</body>
+</html>
